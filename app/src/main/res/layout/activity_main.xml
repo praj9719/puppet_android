@@ -3,15 +3,91 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/purple_500"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-    <TextView
-        android:textColor="@color/purple_500"
-        android:textSize="32dp"
-        android:textStyle="bold"
-        android:fontFamily="casual"
-        android:text="@string/app_name"
+    <LinearLayout
+        android:background="@drawable/shape_round_white_corner_small"
         android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="64dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="16dp"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@string/app_name"
+            android:gravity="center"
+            android:textSize="26dp"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:textColor="@color/purple_500"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <ImageView
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:scaleType="centerCrop"
+            android:layout_gravity="center"
+            android:layout_width="150dp"
+            android:layout_height="150dp"/>
+        <TextView
+            android:text="Last connected devices"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <include layout="@layout/layout_break_line"/>
+        <LinearLayout
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="16dp"
+                android:text="Asus - X707"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:text="193.115.100.114:5000"
+                android:paddingHorizontal="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="16dp"
+                android:text="Dell - 3000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:text="193.115.100.114:5000"
+                android:paddingHorizontal="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <include layout="@layout/layout_break_line"/>
+        <Button
+            android:id="@+id/btn_scan_qr_code"
+            android:text="Scan QR code"
+            android:drawableLeft="@drawable/ic_camera"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 </RelativeLayout>
