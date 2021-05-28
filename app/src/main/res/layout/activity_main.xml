@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:background="@color/purple_500"
     android:layout_height="match_parent"
+    android:screenOrientation="portrait"
     tools:context=".MainActivity">
     <LinearLayout
         android:background="@drawable/shape_round_white_corner_small"
         android:layout_centerInParent="true"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="64dp"
+        android:layout_margin="16dp"
         android:paddingHorizontal="8dp"
         android:paddingVertical="16dp"
         android:layout_width="match_parent"
