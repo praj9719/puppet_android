@@ -4,6 +4,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +17,15 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.pentagon.puppet.communicate.SetupAsync;
+import com.pentagon.puppet.communicate.SetupListener;
+import com.pentagon.puppet.extra.Popup;
 import com.pentagon.puppet.object.Device;
+
+import java.io.IOException;
+import java.net.Socket;
+
+// 192.168.43.250:9999
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         init();
+        startActivity(new Intent(MainActivity.this, TempActivity.class));
     }
 
     private void init(){
@@ -45,24 +57,31 @@ public class MainActivity extends AppCompatActivity {
             if (result.getContents() == null) Toast.makeText(this, "Result not found!", Toast.LENGTH_SHORT).show();
             else{
                 String txt = result.getContents();
-                if (txt != null && !txt.isEmpty()) popupDevice(new Device("S-707", "194.214.165.117", "9999"));
+                if (txt != null && !txt.isEmpty()) {
+                    String[] arr = txt.split("<-->");
+                    if (arr.length == 3) popupConnect(arr[0], txt);
+                    else popup(txt);
+                }
             }
         }else super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void popupDevice(Device device){
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(device.getName())
-                .setMessage(device.getIP()+":"+device.getPort())
-                .setPositiveButton("Connect", (dialogInterface, i) -> connectDevice(device))
-                .setNegativeButton("Cancel", (dialogInterface, i) -> {})
-                .create();
-        dialog.show();
+    private void popupConnect(String name, String deviceinfo){
+        Popup popup = new Popup(this, "Server Found!", "Connect to " + name);
+        popup.onClick("Connect", () -> {
+            startActivity(new Intent(MainActivity.this, TempActivity.class).putExtra("deviceinfo", deviceinfo));
+        });
     }
 
-    private void connectDevice(Device device){
-        startActivity(new Intent(MainActivity.this, HomeActivity.class));
-    }
+    private void popup(String msg){
+        Popup popup = new Popup(this, msg);
+        popup.onClick("Copy", () -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label", msg);
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(this, "Copied!", Toast.LENGTH_SHORT).show();
+        });
 
+    }
 
 }

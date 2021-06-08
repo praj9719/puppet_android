@@ -4,9 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <Button
-        android:text="Temp"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:id="@+id/topnavbar"
+        android:layout_width="match_parent"
+        android:background="@color/light_gray"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+    </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/mousepad"
+        android:layout_below="@id/topnavbar"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>
