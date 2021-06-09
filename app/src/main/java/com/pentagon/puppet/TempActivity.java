@@ -6,17 +6,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.pentagon.puppet.communicate.SendAsync;
 import com.pentagon.puppet.communicate.SetupAsync;
 import com.pentagon.puppet.communicate.SetupListener;
+import com.pentagon.puppet.extra.C;
 import com.pentagon.puppet.extra.Popup;
 import com.pentagon.puppet.object.Device;
 
 import java.net.Socket;
-import java.text.DecimalFormat;
 
 public class TempActivity extends AppCompatActivity {
 
     private static final String TAG = "TempActivity";
+    private Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,9 +26,7 @@ public class TempActivity extends AppCompatActivity {
         setContentView(R.layout.activity_temp);
         Device server = getServer();
         if (server != null) connect(server);
-        else {
-            Log.d(TAG, "onCreate: server is null!");
-        }
+        else Toast.makeText(this, "Server not found!", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -42,15 +42,42 @@ public class TempActivity extends AppCompatActivity {
     private void connect(Device device){
         new SetupAsync(this, device, new SetupListener() {
             @Override
-            public void onSuccess(Socket socket) {
-                Log.d(TAG, "onSuccess: success");
+            public void onSuccess(Socket sct) {
+                socket = sct;
+                init();
             }
 
             @Override
             public void onFailed(String message) {
-                Log.d(TAG, "onFailed: message");
+                Toast.makeText(TempActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         }).execute();
     }
 
+
+    private void init(){
+        validateConnection();
+        sendCommand(C.tmpCmd(0, 0, 0));
+    }
+
+
+    private void sendCommand(String cmd){
+        validateConnection();
+        new SendAsync(socket, cmd).execute();
+
+    }
+
+    private void validateConnection(){
+        if (socket == null || !socket.isConnected())
+            new Popup(this, "Server is not connected!").onClick("Terminate", this::lobby);
+    }
+
+    private void lobby(){
+        Log.d(TAG, "lobby: closing activity");
+        finish();
+    }
+
+
 }
+
+// TODO need to work on onResume, onPause, onStart, onFinish calls

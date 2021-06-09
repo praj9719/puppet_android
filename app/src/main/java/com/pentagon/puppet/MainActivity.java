@@ -25,8 +25,6 @@ import com.pentagon.puppet.object.Device;
 import java.io.IOException;
 import java.net.Socket;
 
-// 192.168.43.250:9999
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -41,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         init();
-        startActivity(new Intent(MainActivity.this, TempActivity.class));
+        popupConnect("X-477", "X-477<-->192.168.43.250<-->9999");
     }
 
     private void init(){
@@ -67,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void popupConnect(String name, String deviceinfo){
+        Log.d(TAG, "popupConnect: deviceinfo: " + deviceinfo);
         Popup popup = new Popup(this, "Server Found!", "Connect to " + name);
         popup.onClick("Connect", () -> {
             startActivity(new Intent(MainActivity.this, TempActivity.class).putExtra("deviceinfo", deviceinfo));
