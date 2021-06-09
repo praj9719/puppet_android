@@ -1,9 +1,16 @@
 package com.pentagon.puppet;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.VelocityTrackerCompat;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.pentagon.puppet.communicate.SendAsync;
@@ -19,16 +26,26 @@ public class TempActivity extends AppCompatActivity {
 
     private static final String TAG = "TempActivity";
     private Socket socket;
+    private RelativeLayout mousePad;
+    private GestureDetector gestureDetector;
+    private VelocityTracker mVelocityTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp);
+        mousePad = findViewById(R.id.mousepad);
+//        init();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         Device server = getServer();
         if (server != null) connect(server);
         else Toast.makeText(this, "Server not found!", Toast.LENGTH_SHORT).show();
     }
-
 
     private Device getServer(){
         String deviceinfo = getIntent().getStringExtra("deviceinfo");
@@ -49,15 +66,50 @@ public class TempActivity extends AppCompatActivity {
 
             @Override
             public void onFailed(String message) {
-                Toast.makeText(TempActivity.this, message, Toast.LENGTH_SHORT).show();
+                new Popup(TempActivity.this, "Error", message).show();
             }
         }).execute();
     }
 
-
+    @SuppressLint("ClickableViewAccessibility")
     private void init(){
         validateConnection();
-        sendCommand(C.tmpCmd(0, 0, 0));
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                sendCommand(C.tmpCmd(0, 0, 2));
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                sendCommand(C.tmpCmd(0, 0, 1));
+                return super.onSingleTapConfirmed(e);
+            }
+        });
+        mousePad.setOnTouchListener((view, event) -> {
+            gestureDetector.onTouchEvent(event);
+            int index = event.getActionIndex();
+            int action = event.getActionMasked();
+            int pointerId = event.getPointerId(index);
+            switch(action) {
+                case MotionEvent.ACTION_DOWN:
+                    if(mVelocityTracker == null) mVelocityTracker = VelocityTracker.obtain();
+                    else mVelocityTracker.clear();
+                    mVelocityTracker.addMovement(event);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mVelocityTracker.addMovement(event);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    int vX = (int)mVelocityTracker.getXVelocity(pointerId);
+                    int vY = (int)mVelocityTracker.getYVelocity(pointerId);
+                    int x = (int)(vX*0.01);
+                    int y = (int)(vY*0.01);
+                    sendCommand(C.tmpCmd(x, y, 0));
+                    break;
+            }
+            return true;
+        });
     }
 
 

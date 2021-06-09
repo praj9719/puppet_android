@@ -2,18 +2,14 @@ package com.pentagon.puppet.communicate;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.util.Log;
 
 import com.pentagon.puppet.object.Device;
 
-import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
-public class SetupAsync extends AsyncTask<Void, Void, Void> {
+public class SetupAsync extends AsyncTask<Void, Void, Socket> {
 
     private static final String TAG = "SetupAsync";
 
@@ -37,14 +33,22 @@ public class SetupAsync extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Socket doInBackground(Void... voids) {
+        Socket socket = null;
         try {
-            Socket socket = new Socket(String.valueOf(device.getIP()), Integer.parseInt(device.getPort()));
-            setupListener.onSuccess(socket);
+            socket = new Socket(String.valueOf(device.getIP()), Integer.parseInt(device.getPort()));
         } catch (Exception e) {
+            Log.d(TAG, "doInBackground: " + e.getMessage());
             setupListener.onFailed(e.getMessage());
         }
+        return socket;
+    }
+
+    @Override
+    protected void onPostExecute(Socket socket) {
+        super.onPostExecute(socket);
         progressDialog.dismiss();
-        return null;
+        if (socket == null) setupListener.onFailed("Null response!");
+        else setupListener.onSuccess(socket);
     }
 }
