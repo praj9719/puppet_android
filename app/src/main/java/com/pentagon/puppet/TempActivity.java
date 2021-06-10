@@ -4,13 +4,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.VelocityTrackerCompat;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pentagon.puppet.communicate.SendAsync;
@@ -21,30 +30,34 @@ import com.pentagon.puppet.extra.Popup;
 import com.pentagon.puppet.object.Device;
 
 import java.net.Socket;
+import java.util.Stack;
 
 public class TempActivity extends AppCompatActivity {
 
     private static final String TAG = "TempActivity";
-    private Socket socket;
     private RelativeLayout mousePad;
+    private ImageView keyboard;
+
+    private Socket socket;
     private GestureDetector gestureDetector;
     private VelocityTracker mVelocityTracker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp);
         mousePad = findViewById(R.id.mousepad);
+        keyboard = findViewById(R.id.keyboard);
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        keyboard.setOnClickListener(view -> imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0));
+
+
+//        Device server = getServer();
+//        if (server != null) connect(server);
+//        else Toast.makeText(this, "Server not found!", Toast.LENGTH_SHORT).show();
 //        init();
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Device server = getServer();
-        if (server != null) connect(server);
-        else Toast.makeText(this, "Server not found!", Toast.LENGTH_SHORT).show();
     }
 
     private Device getServer(){
@@ -73,7 +86,8 @@ public class TempActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void init(){
-        validateConnection();
+//        validateConnection();
+        // Mouse
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener(){
             @Override
             public boolean onDoubleTap(MotionEvent e) {
@@ -110,6 +124,7 @@ public class TempActivity extends AppCompatActivity {
             }
             return true;
         });
+        // Keyboard
     }
 
 
@@ -130,6 +145,16 @@ public class TempActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+    }
 }
 
 // TODO need to work on onResume, onPause, onStart, onFinish calls
