@@ -1,20 +1,15 @@
 package com.pentagon.puppet;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.VelocityTrackerCompat;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
-import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,18 +20,19 @@ import android.widget.Toast;
 import com.pentagon.puppet.communicate.SendAsync;
 import com.pentagon.puppet.communicate.SetupAsync;
 import com.pentagon.puppet.communicate.SetupListener;
-import com.pentagon.puppet.extra.C;
+import com.pentagon.puppet.extra.GlobalConstant;
 import com.pentagon.puppet.extra.Popup;
 import com.pentagon.puppet.object.Device;
 
 import java.net.Socket;
-import java.util.Stack;
 
 public class TempActivity extends AppCompatActivity {
 
     private static final String TAG = "TempActivity";
-    private RelativeLayout mousePad;
-    private ImageView keyboard;
+    private RelativeLayout mousePad, paintPad;
+    private ImageView keyboard, mTerminateConnection;
+    private GlobalConstant gc;
+    private TextView mServerName, mConnectionStatus, mLeftClick, mRightClick;
 
     private Socket socket;
     private GestureDetector gestureDetector;
@@ -47,18 +43,31 @@ public class TempActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp);
+        gc = new GlobalConstant();
         mousePad = findViewById(R.id.mousepad);
+        paintPad = findViewById(R.id.paintpad);
         keyboard = findViewById(R.id.keyboard);
-
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        keyboard.setOnClickListener(view -> imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0));
-
-
-//        Device server = getServer();
-//        if (server != null) connect(server);
-//        else Toast.makeText(this, "Server not found!", Toast.LENGTH_SHORT).show();
-//        init();
+        mServerName = findViewById(R.id.server_name);
+        mConnectionStatus = findViewById(R.id.connection_status);
+        mTerminateConnection = findViewById(R.id.terminate_connection);
+        mLeftClick = findViewById(R.id.left_click);
+        mRightClick = findViewById(R.id.right_click);
+        keyboard.setOnClickListener(view -> gc.toggleKeyboard(this));
+        mTerminateConnection.setOnClickListener(view ->
+                new Popup(this, "Terminate Connection")
+                        .onClick("Terminate", () -> {
+                            sendCommand(gc.terminate_connection);
+                            lobby();
+                        })
+        );
+        mLeftClick.setOnClickListener(view -> sendCommand(gc.newCmd(0, 0, gc.singleClick, gc.default_key)));
+        mRightClick.setOnClickListener(view -> sendCommand(gc.newCmd(0, 0, gc.rightClick, gc.default_key)));
+        Device server = getServer();
+        if (server != null) connect(server);
+        else Toast.makeText(this, "Server not found!", Toast.LENGTH_SHORT).show();
+        init();
     }
+
 
     private Device getServer(){
         String deviceinfo = getIntent().getStringExtra("deviceinfo");
@@ -70,11 +79,12 @@ public class TempActivity extends AppCompatActivity {
     }
 
     private void connect(Device device){
+        mServerName.setText(device.getName());
         new SetupAsync(this, device, new SetupListener() {
             @Override
             public void onSuccess(Socket sct) {
                 socket = sct;
-                init();
+                mConnectionStatus.setText("Connected");
             }
 
             @Override
@@ -86,18 +96,17 @@ public class TempActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void init(){
-//        validateConnection();
-        // Mouse
+        // Mouse Pad
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener(){
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                sendCommand(C.tmpCmd(0, 0, 2));
+                sendCommand(gc.newCmd(0, 0, gc.doubleClick, gc.default_key));
                 return super.onDoubleTap(e);
             }
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                sendCommand(C.tmpCmd(0, 0, 1));
+                sendCommand(gc.newCmd(0, 0, gc.singleClick, gc.default_key));
                 return super.onSingleTapConfirmed(e);
             }
         });
@@ -119,12 +128,34 @@ public class TempActivity extends AppCompatActivity {
                     int vY = (int)mVelocityTracker.getYVelocity(pointerId);
                     int x = (int)(vX*0.01);
                     int y = (int)(vY*0.01);
-                    sendCommand(C.tmpCmd(x, y, 0));
+                    sendCommand(gc.newCmd(x, y, 0, gc.default_key));
                     break;
             }
             return true;
         });
-        // Keyboard
+        // PaintPad
+        paintPad.setOnTouchListener((view, event) -> {
+            int index = event.getActionIndex();
+            int action = event.getActionMasked();
+            int pointerId = event.getPointerId(index);
+            switch(action) {
+                case MotionEvent.ACTION_DOWN:
+                    if(mVelocityTracker == null) mVelocityTracker = VelocityTracker.obtain();
+                    else mVelocityTracker.clear();
+                    mVelocityTracker.addMovement(event);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mVelocityTracker.addMovement(event);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    int vX = (int)mVelocityTracker.getXVelocity(pointerId);
+                    int vY = (int)mVelocityTracker.getYVelocity(pointerId);
+                    int x = (int)(vX*0.01);
+                    int y = (int)(vY*0.01);
+                    sendCommand(gc.newCmd(x, y, gc.singleClick, gc.default_key));
+                    break;
+            }
+            return true;
+        });
     }
 
 
@@ -140,20 +171,31 @@ public class TempActivity extends AppCompatActivity {
     }
 
     private void lobby(){
-        Log.d(TAG, "lobby: closing activity");
         finish();
     }
 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        String key;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_ENTER:
+                key = gc.enter;
+                break;
+            case KeyEvent.KEYCODE_DEL:
+                key = gc.delete;
+                break;
+            case KeyEvent.KEYCODE_SPACE:
+                key = gc.space;
+                break;
+            default:
+                char ch = (char) event.getUnicodeChar();
+                key = String.valueOf(ch);
+                break;
+        }
+        if (key.trim().isEmpty()) key = gc.default_key;
+        sendCommand(gc.newCmd(0, 0, 0, key));
         return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-
     }
 }
 

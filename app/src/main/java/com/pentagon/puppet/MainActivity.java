@@ -45,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private void init(){
         qrScan = new IntentIntegrator(this);
         mBtnQR = findViewById(R.id.btn_scan_qr_code);
-        mBtnQR.setOnClickListener(view -> qrScan.initiateScan());
+//        mBtnQR.setOnClickListener(view -> qrScan.initiateScan());
+        mBtnQR.setOnClickListener(view -> popupConnect("X-477", "X-477<-->192.168.43.250<-->9999"));
     }
 
     @Override

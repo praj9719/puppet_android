@@ -28,17 +28,20 @@
                     android:orientation="vertical"
                     android:layout_height="wrap_content">
                     <TextView
-                        android:text="Server name"
+                        android:id="@+id/server_name"
+                        android:text="Server"
                         android:textSize="16dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
                     <TextView
+                        android:id="@+id/connection_status"
                         android:layout_marginLeft="16dp"
-                        android:text="Status"
+                        android:text="Not Connected"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
                 <ImageView
+                    android:id="@+id/terminate_connection"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?android:attr/selectableItemBackground"
@@ -62,16 +65,16 @@
                 android:orientation="vertical"
                 android:layout_weight="1">
                 <RelativeLayout
-                    android:visibility="visible"
                     android:id="@+id/paintpad"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:layout_width="match_parent">
+                    android:visibility="visible">
                     <TextView
-                        android:padding="16dp"
-                        android:drawableRight="@drawable/ic_brush"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:drawableRight="@drawable/ic_brush"
+                        android:padding="16dp" />
                 </RelativeLayout>
                 <include layout="@layout/breaker"/>
                 <RelativeLayout
@@ -91,6 +94,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp">
                 <TextView
+                    android:id="@+id/left_click"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?android:attr/selectableItemBackground"
@@ -114,6 +118,7 @@
                     android:layout_height="match_parent"/>
                 <include layout="@layout/breaker_verticle"/>
                 <TextView
+                    android:id="@+id/right_click"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?android:attr/selectableItemBackground"
