@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -39,14 +40,12 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         init();
-        popupConnect("X-477", "X-477<-->192.168.43.250<-->9999");
     }
 
     private void init(){
         qrScan = new IntentIntegrator(this);
         mBtnQR = findViewById(R.id.btn_scan_qr_code);
-//        mBtnQR.setOnClickListener(view -> qrScan.initiateScan());
-        mBtnQR.setOnClickListener(view -> popupConnect("X-477", "X-477<-->192.168.43.250<-->9999"));
+        mBtnQR.setOnClickListener(view -> qrScan.initiateScan());
     }
 
     @Override
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void popupConnect(String name, String deviceinfo){
         Log.d(TAG, "popupConnect: deviceinfo: " + deviceinfo);
-        Popup popup = new Popup(this, "Server Found!", "Connect to " + name);
+        Popup popup = new Popup(this, "Connect to " + name);
         popup.onClick("Connect", () -> {
             startActivity(new Intent(MainActivity.this, TempActivity.class).putExtra("deviceinfo", deviceinfo));
         });
@@ -82,6 +81,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Copied!", Toast.LENGTH_SHORT).show();
         });
 
+    }
+
+    public void lastDevice(View view){
+        popupConnect("X-477", "X-477<-->192.168.43.250<-->9999");
     }
 
 }

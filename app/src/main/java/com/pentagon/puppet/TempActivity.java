@@ -53,13 +53,7 @@ public class TempActivity extends AppCompatActivity {
         mLeftClick = findViewById(R.id.left_click);
         mRightClick = findViewById(R.id.right_click);
         keyboard.setOnClickListener(view -> gc.toggleKeyboard(this));
-        mTerminateConnection.setOnClickListener(view ->
-                new Popup(this, "Terminate Connection")
-                        .onClick("Terminate", () -> {
-                            sendCommand(gc.terminate_connection);
-                            lobby();
-                        })
-        );
+        mTerminateConnection.setOnClickListener(view -> onBackPressed());
         mLeftClick.setOnClickListener(view -> sendCommand(gc.newCmd(0, 0, gc.singleClick, gc.default_key)));
         mRightClick.setOnClickListener(view -> sendCommand(gc.newCmd(0, 0, gc.rightClick, gc.default_key)));
         Device server = getServer();
@@ -196,6 +190,15 @@ public class TempActivity extends AppCompatActivity {
         if (key.trim().isEmpty()) key = gc.default_key;
         sendCommand(gc.newCmd(0, 0, 0, key));
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        new Popup(this, "Terminate Connection")
+                .onClick("Terminate", () -> {
+                    sendCommand(gc.terminate_connection);
+                    lobby();
+                });
     }
 }
 
